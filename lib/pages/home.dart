@@ -159,8 +159,7 @@ class StationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final border = BorderRadius.circular(15);
     return InkWell(onTap: () {
-      Navigator.pushNamed(context, Player.routeName,
-          arguments: PlayerArguments(radio));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Player(radioModel: radio,)));
     },
     child: PhysicalModel(
         elevation: 10,
@@ -204,8 +203,7 @@ class StationItem extends StatelessWidget {
               ..translate(0.0, 0.0, depth * depthFactor),
             child: InkWell(
               onTap: () {
-                Navigator.pushNamed(context, '/player',
-                    arguments: PlayerArguments(radio));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Player(radioModel: radio)));
               },
               child: SizedBox(height: height, child: StationCard(radio: radio)),
             )));

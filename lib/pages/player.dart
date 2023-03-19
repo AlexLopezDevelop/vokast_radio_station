@@ -1,6 +1,7 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../components/media_data.dart';
@@ -21,6 +22,10 @@ class PositionData {
 }
 
 class Player extends StatefulWidget {
+  const Player({Key? key, required this.radioModel}) : super(key: key);
+
+  final RadioModel radioModel;
+
   static const routeName = '/player';
 
   @override
@@ -39,11 +44,20 @@ class _PlayerState extends State<Player> {
             PositionData(position, duration ?? Duration.zero, bufferedPosition),
       );
 
+  get radioModel => widget.radioModel;
+
   @override
   void initState() {
     super.initState();
-    audioPlayer.setUrl("");
+   audioPlayer = AudioPlayer();
+   init();
   }
+
+  Future init() async {
+
+  }
+
+
 
   @override
   void dispose() {
@@ -53,10 +67,22 @@ class _PlayerState extends State<Player> {
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as PlayerArguments;
-
     setState(() {
-      audioPlayer.setUrl(args.radioModel.url);
+      final playlist = ConcatenatingAudioSource(children: [
+        AudioSource.uri(
+          Uri.parse(radioModel.url),
+          tag: MediaItem(
+            id: radioModel.id,
+            title: radioModel.name,
+            artUri: Uri.parse(radioModel.image),
+          ),
+        ),
+      ]);
+
+      audioPlayer.setUrl(radioModel.url);
+      audioPlayer.setAudioSource(playlist);
+      audioPlayer.setLoopMode(LoopMode.all);
+      audioPlayer.play();
     });
 
     return Scaffold(
@@ -91,10 +117,12 @@ class _PlayerState extends State<Player> {
               StreamBuilder<PositionData>(
                   stream: positionDataStream,
                   builder: (context, snapshot) {
-
                     final positionData = snapshot.data;
                     return Column(children: [
-                      MediaData(imageUrl: args.radioModel.image, title: args.radioModel.name, artist: ""),
+                      MediaData(
+                          imageUrl: radioModel.image,
+                          title: radioModel.name,
+                          artist: ""),
                       ProgressBar(
                           barHeight: 8,
                           baseBarColor: Colors.grey.shade600,
@@ -106,7 +134,7 @@ class _PlayerState extends State<Player> {
                           progress: positionData?.position ?? Duration.zero,
                           total: positionData?.duration ?? Duration.zero,
                           buffered:
-                          positionData?.bufferedPosition ?? Duration.zero,
+                              positionData?.bufferedPosition ?? Duration.zero,
                           onSeek: audioPlayer.seek)
                     ]);
                   }),
@@ -128,7 +156,6 @@ class Controls extends StatelessWidget {
     return StreamBuilder<PlayerState>(
         stream: audioPlayer.playerStateStream,
         builder: (context, snapshot) {
-
           final playerState = snapshot.data;
           final processingState = playerState?.processingState;
           final playing = playerState?.playing;
