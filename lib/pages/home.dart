@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:vokast/models/station.dart';
+import 'package:vokast/models/radio.dart';
+import 'package:vokast/pages/player.dart';
+import 'package:vokast/services/db_download_service.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -38,7 +40,8 @@ class StationList extends StatefulWidget {
   _StationListState createState() => _StationListState();
 }
 
-class _StationListState extends State<StationList> with SingleTickerProviderStateMixin {
+class _StationListState extends State<StationList>
+    with SingleTickerProviderStateMixin {
   bool selectedMode = false;
   late AnimationController animationController;
 
@@ -91,20 +94,28 @@ class _StationListState extends State<StationList> with SingleTickerProviderStat
                           height: constrains.maxHeight,
                           width: constrains.maxWidth * 0.45,
                           color: Colors.white,
-                          child: Stack(
-                            children: List.generate(
-                                4,
-                                    (index) => StationItem(
-                                  height: constrains.maxHeight / 2,
-                                  station: stationsList[index],
-                                  percent: selectedValue,
-                                  depth: index,
-                                )).reversed.toList(),
-                          ),
-                        ),
-                      )),
-                );
-              });
+                          child: FutureBuilder(
+                              future: DBDownloadService.fetchTopRadios(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<List<RadioModel>> radios) {
+                                print(radios.data);
+                                if (radios.hasData) {
+                                  return Stack(
+                                    children: List.generate(
+                                        radios.data!.length,
+                                            (index) => StationItem(
+                                          height: constrains.maxHeight / 2,
+                                          radio: radios.data![index],
+                                          percent: selectedValue,
+                                          depth: index,
+                                        )).reversed.toList(),
+                                  );
+                                }
+                                return const Center(child: CircularProgressIndicator());
+                              }),
+                  )),
+            ));
+          });
     });
   }
 }
@@ -116,42 +127,52 @@ class HorizontalList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Padding(padding: EdgeInsets.all(12), child: Text('All Stations')),
-        Expanded(
-            child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: stationsList.length,
-                itemBuilder: (context, index) {
-                  final station = stationsList[index];
-                  return Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: StationCard(station: station));
-                })),
+        const Padding(padding: EdgeInsets.all(12), child: Text('All Stations')), FutureBuilder(
+              future: DBDownloadService.fetchRadios(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<RadioModel>> radios) {
+                if (radios.hasData) {
+                  return Expanded(
+                      child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: radios.data!.length,
+                          itemBuilder: (context, index) {
+                            final radio = radios.data![index];
+                            return Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: StationCard(radio: radio));
+                          }));
+                }
+                return const Center(child: CircularProgressIndicator());
+              }),
       ],
     );
   }
 }
 
 class StationCard extends StatelessWidget {
-  const StationCard({super.key, required this.station});
+  const StationCard({super.key, required this.radio});
 
-  final Station station;
+  final RadioModel radio;
 
   @override
   Widget build(BuildContext context) {
     final border = BorderRadius.circular(15);
-
-    return PhysicalModel(
+    return InkWell(onTap: () {
+      Navigator.pushNamed(context, Player.routeName,
+          arguments: PlayerArguments(radio));
+    },
+    child: PhysicalModel(
         elevation: 10,
         color: Colors.white,
         borderRadius: border,
         child: ClipRRect(
           borderRadius: border,
           child: Image.network(
-            station.image,
+            radio.image,
             fit: BoxFit.cover,
           ),
-        ));
+        )));
   }
 }
 
@@ -159,11 +180,11 @@ class StationItem extends StatelessWidget {
   const StationItem(
       {super.key,
       required this.height,
-      required this.station,
+      required this.radio,
       required this.percent,
       required this.depth});
 
-  final Station station;
+  final RadioModel radio;
   final double height;
   final double percent;
   final int depth;
@@ -177,19 +198,16 @@ class StationItem extends StatelessWidget {
         left: 0,
         right: 0,
         child: Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001)
-            ..translate(0.0, 0.0, depth * depthFactor),
-          child: InkWell(
-            onTap: () {
-              print(station.name);
-            },
-            child: SizedBox(
-              height: height,
-              child: StationCard(station: station)
-            ),
-          )
-        ));
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..translate(0.0, 0.0, depth * depthFactor),
+            child: InkWell(
+              onTap: () {
+                Navigator.pushNamed(context, '/player',
+                    arguments: PlayerArguments(radio));
+              },
+              child: SizedBox(height: height, child: StationCard(radio: radio)),
+            )));
   }
 }

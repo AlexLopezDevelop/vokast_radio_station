@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vokast/pages/home.dart';
+import 'package:vokast/pages/player.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,6 +15,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Vokast',
       home: MyHomePage(),
+      routes: {
+        Player.routeName: (context) => Player(),
+      }
     );
   }
 }
