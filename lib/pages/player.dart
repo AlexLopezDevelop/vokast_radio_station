@@ -1,4 +1,3 @@
-import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -32,8 +31,11 @@ class Player extends StatefulWidget {
   _PlayerState createState() => _PlayerState();
 }
 
-class _PlayerState extends State<Player> {
+class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
   AudioPlayer audioPlayer = AudioPlayer();
+  late AnimationController _controller;
+  late Animation<Alignment> _topAlignAnimation;
+  late Animation<Alignment> _bottomAlignAnimation;
 
   Stream<PositionData> get positionDataStream =>
       Rx.combineLatest3<Duration, Duration?, Duration, PositionData>(
@@ -49,19 +51,54 @@ class _PlayerState extends State<Player> {
   @override
   void initState() {
     super.initState();
-   audioPlayer = AudioPlayer();
-   init();
+    audioPlayer = AudioPlayer();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 8));
+    _topAlignAnimation = TweenSequence<Alignment>([
+      TweenSequenceItem(
+          tween: Tween<Alignment>(
+              begin: Alignment.topLeft, end: Alignment.topRight),
+          weight: 1),
+      TweenSequenceItem(
+          tween: Tween<Alignment>(
+              begin: Alignment.topRight, end: Alignment.bottomRight),
+          weight: 1),
+      TweenSequenceItem(
+          tween: Tween<Alignment>(
+              begin: Alignment.bottomRight, end: Alignment.bottomLeft),
+          weight: 1),
+      TweenSequenceItem(
+          tween: Tween<Alignment>(
+              begin: Alignment.bottomLeft, end: Alignment.topLeft),
+          weight: 1)
+    ]).animate(_controller);
+
+    _bottomAlignAnimation = TweenSequence<Alignment>([
+      TweenSequenceItem(
+          tween: Tween<Alignment>(
+              begin: Alignment.bottomRight, end: Alignment.bottomLeft),
+          weight: 1),
+      TweenSequenceItem(
+          tween: Tween<Alignment>(
+              begin: Alignment.bottomLeft, end: Alignment.topLeft),
+          weight: 1),
+      TweenSequenceItem(
+          tween: Tween<Alignment>(
+              begin: Alignment.topLeft, end: Alignment.topRight),
+          weight: 1),
+      TweenSequenceItem(
+          tween: Tween<Alignment>(
+              begin: Alignment.topRight, end: Alignment.bottomRight),
+          weight: 1)
+    ]).animate(_controller);
+
+    _controller.repeat();
   }
-
-  Future init() async {
-
-  }
-
-
 
   @override
   void dispose() {
     audioPlayer.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -97,51 +134,56 @@ class _PlayerState extends State<Player> {
             },
           ),
         ),
-        body: Container(
-          padding: const EdgeInsets.all(20),
-          height: double.infinity,
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF144771),
-                Color(0xFF071A2C),
-              ],
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              StreamBuilder<PositionData>(
-                  stream: positionDataStream,
-                  builder: (context, snapshot) {
-                    final positionData = snapshot.data;
-                    return Column(children: [
-                      MediaData(
-                          imageUrl: radioModel.image,
-                          title: radioModel.name,
-                          artist: ""),
-                      ProgressBar(
-                          barHeight: 8,
-                          baseBarColor: Colors.grey.shade600,
-                          bufferedBarColor: Colors.grey,
-                          progressBarColor: Colors.red,
-                          thumbColor: Colors.red,
-                          timeLabelTextStyle: const TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w600),
-                          progress: positionData?.position ?? Duration.zero,
-                          total: positionData?.duration ?? Duration.zero,
-                          buffered:
+        body: AnimatedBuilder(
+          animation: _controller,
+          builder: (context,_) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              height: double.infinity,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: _topAlignAnimation.value,
+                  end: _bottomAlignAnimation.value,
+                  colors: const [
+                    Color(0xffF99E43),
+                    Color(0xFFDA2323),
+                  ],
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  StreamBuilder<PositionData>(
+                      stream: positionDataStream,
+                      builder: (context, snapshot) {
+                        //final positionData = snapshot.data;
+                        return Column(children: [
+                          MediaData(
+                              imageUrl: radioModel.image,
+                              title: radioModel.name,
+                              artist: ""),
+                          /*ProgressBar(
+                              barHeight: 8,
+                              baseBarColor: Colors.grey.shade600,
+                              bufferedBarColor: Colors.grey,
+                              progressBarColor: Colors.red,
+                              thumbColor: Colors.red,
+                              timeLabelTextStyle: const TextStyle(
+                                  color: Colors.white, fontWeight: FontWeight.w600),
+                              progress: positionData?.position ?? Duration.zero,
+                              total: positionData?.duration ?? Duration.zero,
+                              buffered:
                               positionData?.bufferedPosition ?? Duration.zero,
-                          onSeek: audioPlayer.seek)
-                    ]);
-                  }),
-              const SizedBox(height: 20),
-              Controls(audioPlayer: audioPlayer)
-            ],
-          ),
+                              onSeek: audioPlayer.seek)*/
+                        ]);
+                      }),
+                  const SizedBox(height: 20),
+                  Controls(audioPlayer: audioPlayer)
+                ],
+              ),
+            );
+          },
         ));
   }
 }

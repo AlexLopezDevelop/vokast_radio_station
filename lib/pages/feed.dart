@@ -48,7 +48,7 @@ class Feed extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 35),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18),
             child: Row(children: const [
@@ -131,21 +131,23 @@ class Feed extends StatelessWidget {
                       fontWeight: FontWeight.bold)),
             ]),
           ),
+          const SizedBox(height: 10),
           FutureBuilder(
               future: DBDownloadService.fetchLocalDB(Config.topRadioUrl),
               builder: (BuildContext context,
                   AsyncSnapshot<List<RadioModel>> radios) {
                 if (radios.hasData) {
-                  return ListView.builder(
+                  return  MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      child: ListView.builder(
                             scrollDirection: Axis.vertical,
                             itemCount: radios.data!.length,
                             shrinkWrap: true,
                             physics: const ScrollPhysics(),
                             itemBuilder: (context, index) {
                               final radio = radios.data![index];
-                              return Padding(
-                                  padding: const EdgeInsets.all(0),
-                                  child: Card(
+                              return Card(
                                 elevation: 6,
                                 shadowColor: const Color.fromRGBO(255, 255, 255, 0.3),
                                 margin: const EdgeInsets.symmetric(
@@ -200,9 +202,8 @@ class Feed extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                              ),
                               );
-                            });
+                            }));
                 }
                 return const Center(child: CircularProgressIndicator());
               }),
