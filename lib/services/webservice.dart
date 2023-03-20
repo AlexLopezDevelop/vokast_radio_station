@@ -6,8 +6,10 @@ import 'package:http/http.dart' as http;
 
 class WebService {
   Future<BaseModel> getData(String url, BaseModel baseModel) async {
+    final apiKey = dotenv.env["API_KEY"] ?? "";
+    print(apiKey);
     final response = await http.get(Uri.parse(url), headers: {
-      'X-RapidAPI-Key': '$dotenv.env["API_KEY"]',
+      'X-RapidAPI-Key': apiKey,
       'X-RapidAPI-Host': 'radio-world-75-000-worldwide-fm-radio-stations.p.rapidapi.com'
     });
     if (response.statusCode == 200) {
