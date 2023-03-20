@@ -120,7 +120,7 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                 height: 200,
                 margin: const EdgeInsets.only(left: 18),
                 child: FutureBuilder(
-                    future: DBDownloadService.fetchLocalDB(Config.apiUrl),
+                    future: DBDownloadService.fetchLocalDB(Config.topRadioUrl),
                     builder: (BuildContext context,
                         AsyncSnapshot<List<RadioModel>> radios) {
                       if (radios.hasData) {
