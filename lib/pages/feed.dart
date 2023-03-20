@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vokast/components/fab_icon.dart';
+import 'package:vokast/pages/player.dart';
 
 import '../config.dart';
 import '../models/radio.dart';
@@ -48,7 +49,7 @@ class Feed extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 35),
+          const SizedBox(height: 30),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18),
             child: Row(children: const [
@@ -131,23 +132,26 @@ class Feed extends StatelessWidget {
                       fontWeight: FontWeight.bold)),
             ]),
           ),
-          const SizedBox(height: 10),
           FutureBuilder(
               future: DBDownloadService.fetchLocalDB(Config.topRadioUrl),
               builder: (BuildContext context,
                   AsyncSnapshot<List<RadioModel>> radios) {
                 if (radios.hasData) {
-                  return  MediaQuery.removePadding(
-                      context: context,
-                      removeTop: true,
-                      child: ListView.builder(
-                            scrollDirection: Axis.vertical,
+                  return ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      scrollDirection: Axis.vertical,
                             itemCount: radios.data!.length,
                             shrinkWrap: true,
                             physics: const ScrollPhysics(),
                             itemBuilder: (context, index) {
                               final radio = radios.data![index];
-                              return Card(
+                              return Padding(
+                                  padding: const EdgeInsets.all(0),
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => Player(radioModel: radio,)));
+                                    },
+                                    child: Card(
                                 elevation: 6,
                                 shadowColor: const Color.fromRGBO(255, 255, 255, 0.3),
                                 margin: const EdgeInsets.symmetric(
@@ -202,8 +206,9 @@ class Feed extends StatelessWidget {
                                     ],
                                   ),
                                 ),
+                              ),)
                               );
-                            }));
+                            });
                 }
                 return const Center(child: CircularProgressIndicator());
               }),
