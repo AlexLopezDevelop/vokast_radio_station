@@ -1,3 +1,3 @@
 abstract class BaseModel {
-  fromJson(List<dynamic> json);
+  fromJson(Map<String, dynamic> json);
 }

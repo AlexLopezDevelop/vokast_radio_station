@@ -1,4 +1,4 @@
 abstract class DBBaseModel {
-  late String id;
+  late int id;
   toMap() {}
 }

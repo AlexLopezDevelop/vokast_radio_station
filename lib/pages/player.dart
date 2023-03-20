@@ -72,7 +72,7 @@ class _PlayerState extends State<Player> {
         AudioSource.uri(
           Uri.parse(radioModel.url),
           tag: MediaItem(
-            id: radioModel.id,
+            id: radioModel.id.toString(),
             title: radioModel.name,
             artUri: Uri.parse(radioModel.image),
           ),

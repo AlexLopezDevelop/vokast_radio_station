@@ -9,66 +9,65 @@ class RadioAPIModel extends BaseModel {
   });
 
   @override
-  fromJson(List<dynamic> json) {
-    data = (json)
-        .map(
-          (i) => RadioModel.fromJson(i),
-        )
-        .toList();
+  fromJson(Map<String, dynamic> json) {
+    data = (json['stations'] as List).map(
+      (i) => RadioModel.fromJson(i),
+    ).toList();
+    print(data);
   }
 }
 
 class RadioModel extends DBBaseModel {
-  static String tableName = 'radio-2';
+  static String tableName = 'radio';
 
-  late final String id;
+  @override
+  late final int id;
   late final String name;
   late final String url;
-  late final String website;
   late final String image;
   late final bool isFavorite;
+  late final String? genre;
 
   RadioModel({
     required this.id,
     required this.name,
     required this.url,
-    required this.website,
     required this.image,
     required this.isFavorite,
+    required this.genre,
   });
 
   factory RadioModel.fromJson(Map<String, dynamic> json) {
     return RadioModel(
-      id: json['changeuuid'],
-      name: json['name'],
-      url: json['url_resolved'],
-      website: json['homepage'],
-      image: json['favicon'],
+      id: json['radio_id'],
+      name: json['radio_name'],
+      url: json['radio_url'],
+      image: json['radio_image'],
       isFavorite: false,
+      genre: json['genre'],
     );
   }
 
   static RadioModel fromMap(Map<String, dynamic> map) {
     return RadioModel(
-        id: map['changeuuid'],
-        name: map['name'],
-        url: map['url_resolved'],
-        website: map['homepage'],
-        image: map['favicon'],
-        isFavorite: map['isFavorite'] == 1 ? true : false);
+        id: map['radio_id'],
+        name: map['radio_name'],
+        url: map['radio_url'],
+        image: map['radio_image'],
+        isFavorite: map['isFavorite'] == 1 ? true : false,
+        genre: map['genre']);
   }
 
   @override
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {
-      'name': name,
-      'url_resolved': url,
-      'homepage': website,
-      'favicon': image,
+      'radio_name': name,
+      'radio_url': url,
+      'radio_image': image,
     };
 
     if (id != null) {
-      map['changeuuid'] = id;
+      map['radio_id'] = id;
     }
 
     return map;

@@ -46,6 +46,7 @@ dependencies:
   just_audio: ^0.9.31
   just_audio_background: ^0.0.1-beta.9
   rxdart: ^0.27.7
+  font_awesome_flutter: ^10.4.0
 
 dev_dependencies:
   flutter_test:
