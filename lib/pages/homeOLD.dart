@@ -158,10 +158,7 @@ class StationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final border = BorderRadius.circular(15);
-    return InkWell(onTap: () {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Player(radioModel: radio,)));
-    },
-    child: PhysicalModel(
+    return PhysicalModel(
         elevation: 3,
         color: Colors.white,
         borderRadius: border,
@@ -171,7 +168,7 @@ class StationCard extends StatelessWidget {
             radio.image,
             fit: BoxFit.cover,
           ),
-        )));
+        ));
   }
 }
 

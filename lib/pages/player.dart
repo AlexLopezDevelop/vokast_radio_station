@@ -33,9 +33,6 @@ class Player extends StatefulWidget {
 
 class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
   AudioPlayer audioPlayer = AudioPlayer();
-  late AnimationController _controller;
-  late Animation<Alignment> _topAlignAnimation;
-  late Animation<Alignment> _bottomAlignAnimation;
 
   Stream<PositionData> get positionDataStream =>
       Rx.combineLatest3<Duration, Duration?, Duration, PositionData>(
@@ -52,53 +49,11 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     audioPlayer = AudioPlayer();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 8));
-    _topAlignAnimation = TweenSequence<Alignment>([
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.topLeft, end: Alignment.topRight),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.topRight, end: Alignment.bottomRight),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.bottomRight, end: Alignment.bottomLeft),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.bottomLeft, end: Alignment.topLeft),
-          weight: 1)
-    ]).animate(_controller);
-
-    _bottomAlignAnimation = TweenSequence<Alignment>([
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.bottomRight, end: Alignment.bottomLeft),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.bottomLeft, end: Alignment.topLeft),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.topLeft, end: Alignment.topRight),
-          weight: 1),
-      TweenSequenceItem(
-          tween: Tween<Alignment>(
-              begin: Alignment.topRight, end: Alignment.bottomRight),
-          weight: 1)
-    ]).animate(_controller);
-
-    _controller.repeat();
   }
 
   @override
   void dispose() {
     audioPlayer.dispose();
-    _controller.dispose();
     super.dispose();
   }
 
@@ -122,48 +77,21 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
       audioPlayer.play();
     });
 
-    return Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
-        body: AnimatedBuilder(
-          animation: _controller,
-          builder: (context,_) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              height: double.infinity,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: _topAlignAnimation.value,
-                  end: _bottomAlignAnimation.value,
-                  colors: const [
-                    Color(0xffF99E43),
-                    Color(0xFFDA2323),
-                  ],
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  StreamBuilder<PositionData>(
-                      stream: positionDataStream,
-                      builder: (context, snapshot) {
-                        //final positionData = snapshot.data;
-                        return Column(children: [
-                          MediaData(
-                              imageUrl: radioModel.image,
-                              title: radioModel.name,
-                              artist: ""),
-                          /*ProgressBar(
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            StreamBuilder<PositionData>(
+                stream: positionDataStream,
+                builder: (context, snapshot) {
+                  //final positionData = snapshot.data;
+                  return Column(children: [
+                    MediaData(
+                        imageUrl: radioModel.image,
+                        title: radioModel.name,
+                        artist: ""),
+                    /*ProgressBar(
                               barHeight: 8,
                               baseBarColor: Colors.grey.shade600,
                               bufferedBarColor: Colors.grey,
@@ -176,14 +104,11 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                               buffered:
                               positionData?.bufferedPosition ?? Duration.zero,
                               onSeek: audioPlayer.seek)*/
-                        ]);
-                      }),
-                  const SizedBox(height: 20),
-                  Controls(audioPlayer: audioPlayer)
-                ],
-              ),
-            );
-          },
+                  ]);
+                }),
+            const SizedBox(height: 20),
+            Controls(audioPlayer: audioPlayer)
+          ],
         ));
   }
 }
