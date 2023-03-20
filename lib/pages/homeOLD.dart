@@ -162,7 +162,7 @@ class StationCard extends StatelessWidget {
       Navigator.push(context, MaterialPageRoute(builder: (context) => Player(radioModel: radio,)));
     },
     child: PhysicalModel(
-        elevation: 10,
+        elevation: 3,
         color: Colors.white,
         borderRadius: border,
         child: ClipRRect(

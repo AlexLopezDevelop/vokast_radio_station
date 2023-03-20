@@ -9,7 +9,6 @@ abstract class DB {
   static int get _version => 1;
 
   static Future<void> init() async {
-    print("DB init: ${_db == null}");
     if (_db != null) {
       return;
     }

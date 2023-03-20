@@ -26,7 +26,7 @@ class RadioModel extends DBBaseModel {
   late final String url;
   late final String image;
   late final bool isFavorite;
-  late final String? genre;
+  late final String genre;
 
   RadioModel({
     required this.id,
@@ -64,6 +64,7 @@ class RadioModel extends DBBaseModel {
       'radio_name': name,
       'radio_url': url,
       'radio_image': image,
+      'genre': genre,
     };
 
     if (id != null) {

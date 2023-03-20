@@ -9,7 +9,7 @@ class DBDownloadService {
     try {
       await DB.init();
       List<Map<String, dynamic>> results = await DB.query(RadioModel.tableName);
-      print(results.isEmpty);
+
       return results.isEmpty ? false : true;
     } catch (e) {
       print(e);
@@ -33,26 +33,21 @@ class DBDownloadService {
     return radioAPIModel.data;
   }
 
-  static Future<List<RadioModel>> fetchLocalDB() async {
+  static Future<List<RadioModel>> fetchLocalDB(url) async {
     try {
       if (!await isLocalDBAvailable()) {
-        print("Local DB is not available");
-        RadioAPIModel radioAPIModel = await fetchAllRadios(Config.apiUrl);
+        RadioAPIModel radioAPIModel = await fetchAllRadios(url);
         if (radioAPIModel.data.isNotEmpty) {
-          print("response api");
           await DB.init();
 
           for (var element in radioAPIModel.data) {
-            print("insert: ${element.name}");
             await DB.insert(RadioModel.tableName, element);
           }
         }
       }
 
-      List<Map<String, dynamic>> results =
-      await DB.query(RadioModel.tableName);
+      List<Map<String, dynamic>> results = await DB.query(RadioModel.tableName);
 
-      print("db results: ${results.length}");
       List<RadioModel> radioModel = <RadioModel>[];
       radioModel = results.map((e) => RadioModel.fromMap(e)).toList();
 
