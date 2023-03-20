@@ -21,9 +21,10 @@ class PositionData {
 }
 
 class Player extends StatefulWidget {
-  const Player({Key? key, required this.radioModel}) : super(key: key);
+  const Player({Key? key, required this.radioModel, required this.audioPlayer}) : super(key: key);
 
   final RadioModel radioModel;
+  final AudioPlayer audioPlayer;
 
   static const routeName = '/player';
 
@@ -32,7 +33,6 @@ class Player extends StatefulWidget {
 }
 
 class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
-  AudioPlayer audioPlayer = AudioPlayer();
 
   Stream<PositionData> get positionDataStream =>
       Rx.combineLatest3<Duration, Duration?, Duration, PositionData>(
@@ -44,17 +44,12 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
       );
 
   get radioModel => widget.radioModel;
-
-  @override
-  void initState() {
-    super.initState();
-    audioPlayer = AudioPlayer();
-  }
+  get audioPlayer => widget.audioPlayer;
 
   @override
   void dispose() {
-    audioPlayer.dispose();
     super.dispose();
+    audioPlayer.dispose();
   }
 
   @override
